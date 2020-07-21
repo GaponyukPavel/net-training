@@ -15,9 +15,20 @@ namespace Reflection.Tasks
         /// </summary>
         /// <param name="assemblyName">name of assembly</param>
         /// <returns>List of public but obsolete classes</returns>
-        public static IEnumerable<string> GetPublicObsoleteClasses(string assemblyName) {
-            // TODO : Implement GetPublicObsoleteClasses method
-            throw new NotImplementedException();
+        public static IEnumerable<string> GetPublicObsoleteClasses(string assemblyName)
+        {
+            List<String> result = new List<string>();
+            Assembly assembly = Assembly.Load(assemblyName);
+            Type[] assemblyTypes = assembly.GetTypes();
+            foreach (Type type in assemblyTypes)
+            {
+                if (!type.IsClass)
+                    continue;
+                var attr = type.GetCustomAttribute(typeof(ObsoleteAttribute));
+                if (attr != null)
+                    result.Add(type.Name);
+            }
+            return result;
         }
 
         /// <summary>
@@ -37,9 +48,17 @@ namespace Reflection.Tasks
         /// <param name="obj">source object to get property from</param>
         /// <param name="propertyPath">dot-separated property path</param>
         /// <returns>property value of obj for required propertyPath</returns>
-        public static T GetPropertyValue<T>(this object obj, string propertyPath) {
-            // TODO : Implement GetPropertyValue method
-            throw new NotImplementedException();
+        public static T GetPropertyValue<T>(this object obj, string propertyPath)
+        {
+            T result;
+            object curentObj = obj;
+            Type type = obj.GetType();
+            string[] Path = propertyPath.Split('.');
+            for (int i = 0; i < Path.Length - 1; i++)
+                curentObj = type.GetProperty(Path[i]).GetValue(curentObj);
+            PropertyInfo propertyInfo = type.GetProperty(Path[Path.Length - 1]);
+            result = (T)propertyInfo.GetValue(curentObj);
+            return result;
         }
 
 
@@ -59,9 +78,14 @@ namespace Reflection.Tasks
         /// <param name="obj">source object to set property to</param>
         /// <param name="propertyPath">dot-separated property path</param>
         /// <param name="value">assigned value</param>
-        public static void SetPropertyValue(this object obj, string propertyPath, object value) {
-            // TODO : Implement SetPropertyValue method
-            throw new NotImplementedException();
+        public static void SetPropertyValue(this object obj, string propertyPath, object value)
+        {
+            object curentObj = obj;
+            string[] Path = propertyPath.Split('.');
+            for (int i = 0; i < Path.Length - 1; i++)
+                curentObj = curentObj.GetType().GetProperty(Path[i]).GetValue(curentObj);
+            PropertyInfo property =  curentObj.GetType().BaseType.GetProperty(Path[Path.Length - 1]);
+            property.GetSetMethod(true).Invoke(curentObj, new object[] { value });
         }
 
 

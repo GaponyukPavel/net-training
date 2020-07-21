@@ -9,7 +9,7 @@ using System.Diagnostics;
 namespace EnumerableTask
 {
 
-    public class Task
+    public class Task   
     {
 
         /// <summary> Transforms all strings to uppercase</summary>
@@ -421,9 +421,12 @@ namespace EnumerableTask
         /// </returns>
         public int GetSpecificEventEntriesCount(EventLogEntryType value)
         {
-            // TODO : Implement GetSpecificEventEntriesCount
-            EventLogEntryCollection systemEvents = (new EventLog("System", ".")).Entries;
-            throw new NotImplementedException();
+            int result = 0;
+            EventLogEntryCollection localEntryLog = new EventLog("System").Entries;
+                foreach (EventLogEntry item in localEntryLog)
+                    if (item.EntryType == value)
+                        result++;
+            return result;
         }
 
 
@@ -440,8 +443,14 @@ namespace EnumerableTask
         /// </example>
         public IEnumerable<string> GetIEnumerableTypesNames(Assembly assembly)
         {
-            // TODO : Implement GetIEnumerableTypesNames
-            throw new NotImplementedException();
+            if (assembly == null)
+                throw new ArgumentNullException();
+            List<string> result = new List<string>();
+            Type[] allTypes = assembly.GetExportedTypes();
+            foreach (Type type in allTypes)
+                if (type.GetInterface("IEnumerable") != null)
+                    result.Add(type.Name);
+            return result.Distinct<string>();
         }
 
         /// <summary>Calculates sales sum by quarter</summary>

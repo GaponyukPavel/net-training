@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Serialization.Tasks
 {
@@ -6,26 +7,47 @@ namespace Serialization.Tasks
     // Employee.Manager should be serialized as reference
     // Company class has to be forward compatible with all derived versions
 
- 
-    public class Company
+    [DataContract(IsReference = true)]
+    [KnownType(typeof(Employee))]
+    [KnownType(typeof(Manager))]
+    [KnownType(typeof(Worker))]
+    public class Company : IExtensibleDataObject
     {
+        [DataMember]
         public string Name { get; set; }
+        [DataMember]
         public IList<Employee> Employee { get; set; }
+        private ExtensionDataObject Data;
+        public virtual ExtensionDataObject ExtensionData
+        {
+            get { return Data; }
+            set { Data = value; }
+        }
     }
 
-    public abstract class Employee {
+    [DataContract(IsReference = true)]
+    public abstract class Employee
+    {
+        [DataMember]
         public string Name { get; set; }
+        [DataMember]
         public string LastName { get; set; }
+        [DataMember]
         public string Title { get; set; }
+        [DataMember]
         public Manager Manager { get; set; }
     }
-
-    public class Worker : Employee {
+    [DataContract]
+    public class Worker : Employee
+    {
+        [DataMember]
         public int Salary { get; set; }
     }
-
-    public class Manager : Employee {
-        public int YearBonusRate { get; set; } 
+    [DataContract]
+    public class Manager : Employee
+    {
+        [DataMember]
+        public int YearBonusRate { get; set; }
     }
 
 }
